@@ -1,0 +1,16 @@
+{
+  extends: [
+    'config:recommended',
+    'docker:pinDigests',
+    'helpers:pinGitHubActionDigests',
+    ':pinDevDependencies'
+  ],
+  packageRules: [
+    {
+      description: 'Auto merge GitHub Actions',
+      matchDatasources: ['github-tags'],
+      groupName: "github-action",
+      automerge: true
+    }
+  ]
+}

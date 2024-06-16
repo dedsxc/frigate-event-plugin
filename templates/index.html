@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frigate Alarm</title>
+<!-- Inline SVG for favicon -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath d='M12 1c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10-4.48-10-10-10zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-12c-.55 0-1 .45-1 1v5c0 .55.45 1 1 1s1-.45 1-1v-5c0-.55-.45-1-1-1z'/%3E%3C/svg%3E" type="image/svg+xml">
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="container">
+    <label class="switch">
+      <input type="checkbox" id="toggle">
+      <span class="slider round"></span>
+    </label>
+    <p id="statusText">Alarm is <span id="status">off</span></p>
+  </div>
+  <div class="events-container">
+    <h2>Events</h2>
+    <div class="events-table-container">
+      <table class="events-table" id="eventsTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Label</th>
+            <th>Camera</th>
+            <th>Score</th>
+            <th>False Positive</th>
+            <th>Start Time</th>
+            <th>Stationary</th>
+          </tr>
+        </thead>
+        <tbody id="eventsBody">
+          <!-- Events will be dynamically added here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
