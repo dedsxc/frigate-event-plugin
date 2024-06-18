@@ -15,6 +15,30 @@ function setToggleButtonState() {
   }
 }
 
+// Event listener for toggle button change
+toggle.addEventListener('change', function() {
+  const alarmState = this.checked ? 'on' : 'off';
+  updateAlarmState(alarmState);
+});
+
+// Function to update alarm state via AJAX
+function updateAlarmState(alarmState) {
+  fetch('/set_alarm', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ alarm_state: alarmState }),
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Alarm state updated successfully:', data.message);
+      localStorage.setItem('alarmState', alarmState); // Update localStorage
+      statusText.textContent = alarmState;
+    })
+    .catch(error => console.error('Error updating alarm state:', error));
+}
+
 // Function to save events to localStorage
 function saveEventsToLocalStorage(events) {
   localStorage.setItem('events', JSON.stringify(events));
@@ -25,17 +49,6 @@ function getEventsFromLocalStorage() {
   const events = localStorage.getItem('events');
   return events ? JSON.parse(events) : [];
 }
-
-// Event listener for toggle button change
-toggle.addEventListener('change', function() {
-  if (this.checked) {
-    statusText.textContent = 'on';
-    localStorage.setItem('alarmState', 'on');
-  } else {
-    statusText.textContent = 'off';
-    localStorage.setItem('alarmState', 'off');
-  }
-});
 
 // Function to format Unix timestamp to human-readable date and time
 function formatUnixTimestamp(timestamp) {

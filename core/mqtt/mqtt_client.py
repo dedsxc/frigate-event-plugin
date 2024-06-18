@@ -5,6 +5,7 @@ import json
 from notification.notification import Notification
 
 EVENTS = []
+ALARM_ON = False
 
 class Broker:
     def __init__(self):
@@ -21,7 +22,6 @@ class Broker:
             ssh_password=os.environ['SSH_PASSWORD']
         )
 
-
     # Function to filter events and save
     def _process_event(self, event_json):
         # Check if event meets criteria (False_positive=false)
@@ -31,14 +31,21 @@ class Broker:
             EVENTS = [
                 event for event in EVENTS
                 if event["before"]["id"] != event_json["before"]["id"]
-                or event["before"]["start_time"] >= event_json["before"]["start_time"]
+                   or event["before"]["start_time"] >= event_json["before"]["start_time"]
             ]
             # Add the new event if it wasn't found in the removal step
             if not any(event["before"]["id"] == event_json["before"]["id"] for event in EVENTS):
                 EVENTS.append(event_json)
-                self.notification.connect()
-                self.notification.execute_command('cd $HOME/git/sentinel-audio-alarm && ./audio.py -f welcome')
-                self.notification.close()
+                if ALARM_ON:
+                    self.notification.connect()
+                    self.notification.execute_command('cd $HOME/git/sentinel-audio-alarm && ./audio.py -f attention')
+                    self.notification.close()
+                else:
+                    print(f"[mqtt] Alarm is disabled. Send welcome message")
+                    self.notification.connect()
+                    self.notification.execute_command('cd $HOME/git/sentinel-audio-alarm && ./audio.py -f welcome')
+                    self.notification.close()
+
 
     # MQTT callback functions
     def _on_connect(self, client, userdata, flags, reason_code, properties):
