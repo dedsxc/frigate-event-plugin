@@ -15,6 +15,7 @@ class Broker:
         self.mqtt_topic = "frigate/events"
         self.mqtt_username = os.environ['MQTT_USER']
         self.mqtt_password = os.environ['MQTT_PASSWORD']
+        self.processed_event_ids = set()
         self.notification = Notification(
             ssh_host=os.environ['SSH_HOST'],
             ssh_port=22,
@@ -26,16 +27,14 @@ class Broker:
     def _process_event(self, event_json):
         # Check if event meets criteria (False_positive=false)
         if not event_json["before"]["false_positive"]:
-            # Remove outdated events with the same ID
             global EVENTS
-            EVENTS = [
-                event for event in EVENTS
-                if event["before"]["id"] != event_json["before"]["id"]
-                   or event["before"]["start_time"] >= event_json["before"]["start_time"]
-            ]
-            # Add the new event if it wasn't found in the removal step
-            if not any(event["before"]["id"] == event_json["before"]["id"] for event in EVENTS):
+            event_id = event_json["before"]["id"]
+            if event_id in self.processed_event_ids:
+                print(f"[mqtt] Event with ID {event_id} has already been processed. Skipping.")
+                return
+            else:
                 EVENTS.append(event_json)
+                self.processed_event_ids.add(event_id)
                 if ALARM_ON:
                     self.notification.connect()
                     self.notification.execute_command('cd $HOME/git/sentinel-audio-alarm && ./audio.py -f attention')
@@ -45,7 +44,6 @@ class Broker:
                     self.notification.connect()
                     self.notification.execute_command('cd $HOME/git/sentinel-audio-alarm && ./audio.py -f welcome')
                     self.notification.close()
-
 
     # MQTT callback functions
     def _on_connect(self, client, userdata, flags, reason_code, properties):
