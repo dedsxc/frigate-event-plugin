@@ -24,8 +24,12 @@ def get_events():
 def set_alarm():
     data = request.get_json()
     alarm_state = data.get('alarm_state')
+    start_time = data.get('start_time')
+    end_time = data.get('end_time')
     if alarm_state == "on":
         mqtt_client.ALARM_ON = True
+        mqtt_client.START_TIME = start_time
+        mqtt_client.END_TIME = end_time
     else:
         mqtt_client.ALARM_ON = False
     print(f"[flask] Alarm state updated: ALARM_ON={mqtt_client.ALARM_ON}")
@@ -37,5 +41,4 @@ if __name__ == "__main__":
     t1 = Thread(target=m.run)
     t1.start()
     serve(app, host="0.0.0.0", port=8080)
-
     t1.join()
