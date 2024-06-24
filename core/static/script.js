@@ -84,18 +84,20 @@ toggle.addEventListener('change', function() {
 
 // Function to update alarm state via AJAX
 function updateAlarmState(alarmState, startTime, endTime) {
+  const isAlarmOn = alarmState === 'on'; // Convert 'on'/'off' to boolean
+
   fetch('/set_alarm', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ alarm_state: alarmState, start_time: startTime, end_time: endTime }),
+    body: JSON.stringify({ alarm_state: isAlarmOn, start_time: startTime, end_time: endTime }),
   })
     .then(response => response.json())
     .then(data => {
       console.log('Alarm state updated successfully:', data.message);
-      localStorage.setItem('alarmState', alarmState); // Update localStorage
-      statusText.textContent = alarmState;
+      localStorage.setItem('alarmState', isAlarmOn); // Update localStorage with boolean
+      statusText.textContent = isAlarmOn ? 'on' : 'off'; // Update status text
     })
     .catch(error => console.error('Error updating alarm state:', error));
 }
@@ -153,6 +155,45 @@ function fetchEvents() {
     .catch(error => console.error('Error fetching events:', error));
 }
 
+// Function to fetch alarm state from backend
+function fetchAlarmStateFromBackend() {
+    fetch('/alarm_state')
+        .then(response => response.json())
+        .then(data => {
+            // Use fetched data to update UI elements
+            console.log('Fetched alarm state:', data);
+
+            // Update localStorage with fetched alarm state
+            localStorage.setItem('alarmState', data.alarm_state);
+            localStorage.setItem('startTime', data.startTime);
+            localStorage.setItem('endTime', data.endTime);
+
+            // Update UI elements related to alarm state
+            updateAlarmStateUI(data.alarm_state, data.startTime, data.endTime);
+        })
+        .catch(error => console.error('Error fetching alarm state:', error));
+}
+
+// Function to update UI elements based on alarm state
+function updateAlarmStateUI(alarmState, startTime, endTime) {
+    const toggle = document.getElementById('toggle');
+    const statusText = document.getElementById('status');
+    const displayStartTime = document.getElementById('displayStartTime');
+    const displayEndTime = document.getElementById('displayEndTime');
+    const setTimes = document.getElementById('setTimes');
+
+    if (alarmState) {
+        toggle.checked = true;
+        statusText.textContent = 'on';
+        displayStartTime.textContent = startTime;
+        displayEndTime.textContent = endTime;
+        setTimes.style.display = 'block';
+    } else {
+        toggle.checked = false;
+        statusText.textContent = 'off';
+        setTimes.style.display = 'none';
+    }
+}
 
 // Initialize toggle button state and events on page load
 setToggleButtonState();
@@ -163,3 +204,4 @@ if (cachedEvents.length > 0) {
 
 // Fetch events every 5 seconds
 setInterval(fetchEvents, 5000);
+fetchAlarmStateFromBackend();
