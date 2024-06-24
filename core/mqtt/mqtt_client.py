@@ -1,6 +1,7 @@
 import paho.mqtt.client as mqtt
 import os
 import json
+import uuid
 import datetime as dt
 
 from notification.notification import Notification
@@ -14,7 +15,7 @@ class Broker:
     def __init__(self):
         self.mqtt_broker = os.environ['MQTT_BROKER']
         self.mqtt_port = 1883
-        self.mqtt_client_id = "python-mqtt"
+        self.mqtt_client_id = f"{uuid.uuid4()}"
         self.mqtt_topic = "frigate/events"
         self.mqtt_username = os.environ['MQTT_USER']
         self.mqtt_password = os.environ['MQTT_PASSWORD']
@@ -70,6 +71,7 @@ class Broker:
         start_time = dt.datetime.strptime(start_time_str, "%H:%M").time()
         end_time = dt.datetime.strptime(end_time_str, "%H:%M").time()
         event_time = dt.datetime.fromtimestamp(event_json_timestamp).time()
+        print(f"[mqtt] start_time={start_time} | event_time={event_time} | end_time={end_time}")
 
         if start_time < end_time:
             return start_time <= event_time <= end_time
