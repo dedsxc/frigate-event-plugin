@@ -2,33 +2,94 @@ const toggle = document.getElementById('toggle');
 const statusText = document.getElementById('status');
 const eventsTable = document.getElementById('eventsTable');
 const eventsBody = document.getElementById('eventsBody');
+const startTimeInput = document.getElementById('startTime');
+const endTimeInput = document.getElementById('endTime');
+const errorMessage = document.getElementById('errorMessage');
+const setTimes = document.getElementById('setTimes');
+const displayStartTime = document.getElementById('displayStartTime');
+const displayEndTime = document.getElementById('displayEndTime');
 
 // Function to set toggle button state based on localStorage
 function setToggleButtonState() {
   const state = localStorage.getItem('alarmState');
-  if (state === 'on') {
+  const startTime = localStorage.getItem('startTime');
+  const endTime = localStorage.getItem('endTime');
+
+  if (state === 'on' && startTime && endTime) {
     toggle.checked = true;
     statusText.textContent = 'on';
+    displayStartTime.textContent = startTime;
+    displayEndTime.textContent = endTime;
+    setTimes.style.display = 'block';
   } else {
     toggle.checked = false;
     statusText.textContent = 'off';
+    setTimes.style.display = 'none';
   }
 }
 
-// Event listener for toggle button change
-toggle.addEventListener('change', function() {
-  const alarmState = this.checked ? 'on' : 'off';
-  updateAlarmState(alarmState);
+// Function to round time to the nearest 10 minutes
+function roundToNearest10Minutes(time) {
+  const [hours, minutes] = time.split(':').map(Number);
+  const roundedMinutes = Math.round(minutes / 10) * 10;
+  const adjustedHours = (roundedMinutes === 60) ? (hours + 1) % 24 : hours;
+  const adjustedMinutes = (roundedMinutes === 60) ? 0 : roundedMinutes;
+  return `${String(adjustedHours).padStart(2, '0')}:${String(adjustedMinutes).padStart(2, '0')}`;
+}
+
+// Event listener to round start time to nearest 10 minutes
+startTimeInput.addEventListener('blur', function() {
+  if (startTimeInput.value) {
+    startTimeInput.value = roundToNearest10Minutes(startTimeInput.value);
+  }
 });
 
+// Event listener to round end time to nearest 10 minutes
+endTimeInput.addEventListener('blur', function() {
+  if (endTimeInput.value) {
+    endTimeInput.value = roundToNearest10Minutes(endTimeInput.value);
+  }
+});
+
+// Event listener for toggle button change
+// Event listener for toggle button change
+toggle.addEventListener('change', function() {
+  const startTime = startTimeInput.value;
+  const endTime = endTimeInput.value;
+
+  if (this.checked && (!startTime || !endTime)) {
+    errorMessage.style.display = 'block';
+    toggle.checked = false;
+    return;
+  }
+
+  errorMessage.style.display = 'none';
+  const alarmState = this.checked ? 'on' : 'off';
+
+  updateAlarmState(alarmState, startTime, endTime);
+
+  if (alarmState === 'on') {
+    localStorage.setItem('startTime', startTime);
+    localStorage.setItem('endTime', endTime);
+    displayStartTime.textContent = startTime;
+    displayEndTime.textContent = endTime;
+    setTimes.style.display = 'block';
+  } else {
+    localStorage.removeItem('startTime');
+    localStorage.removeItem('endTime');
+    setTimes.style.display = 'none';
+  }
+});
+
+
 // Function to update alarm state via AJAX
-function updateAlarmState(alarmState) {
+function updateAlarmState(alarmState, startTime, endTime) {
   fetch('/set_alarm', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ alarm_state: alarmState }),
+    body: JSON.stringify({ alarm_state: alarmState, start_time: startTime, end_time: endTime }),
   })
     .then(response => response.json())
     .then(data => {
@@ -91,6 +152,7 @@ function fetchEvents() {
     })
     .catch(error => console.error('Error fetching events:', error));
 }
+
 
 // Initialize toggle button state and events on page load
 setToggleButtonState();

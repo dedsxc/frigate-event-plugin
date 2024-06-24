@@ -7,18 +7,32 @@
 
 body {
   font-family: Arial, sans-serif;
+  background-color: #ffffff; /* Light theme background */
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  background-color: #f0f0f0;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+h1, h2 {
+  color: #333;
 }
 
 .container {
   display: flex;
-  align-items: center;
-  margin-bottom: 20px;
+  flex-direction: column;
+  gap: 20px; /* Space between each box */
+  width: 100%;
+  max-width: 1200px;
+}
+
+.box {
+  background-color: #f0f0f0; /* Grey background */
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px; /* Space between boxes */
 }
 
 .switch {
@@ -71,22 +85,43 @@ input:checked + .slider:before {
 }
 
 #statusText {
-  margin-left: 10px;
-}
-
-#status {
+  margin-top: 10px;
   font-weight: bold;
-  color: #777;
+  color: #555;
 }
 
-.events-container {
-  max-height: 500px; /* Adjust max height as needed */
-  overflow-y: auto;
+.time-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#startTime, #endTime {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+#displayStartTime, #displayEndTime {
+  font-weight: bold;
+  color: #333;
+}
+
+.events-table-container {
+  overflow-x: auto;
 }
 
 .events-table {
   border-collapse: collapse;
   width: 100%;
+  background-color: #fff;
 }
 
 .events-table th, .events-table td {
