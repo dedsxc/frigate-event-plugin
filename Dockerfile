@@ -8,7 +8,7 @@ RUN apk update && apk add --no-cache libffi-dev openssl-dev build-base
 
 WORKDIR /app
 
-COPY core /app/core
+COPY core /app
 COPY requirements.txt /app
 
 # Install python package
@@ -20,4 +20,6 @@ RUN adduser -D -H -u 1000 $USER && \
 
 USER $USER
 
-CMD ["python3", "core/app.py"]
+EXPOSE 8080
+
+CMD ["python", "app.py"]
