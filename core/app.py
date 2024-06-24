@@ -23,17 +23,19 @@ def get_events():
 @app.route('/set_alarm', methods=['POST'])
 def set_alarm():
     data = request.get_json()
-    alarm_state = data.get('alarm_state')
-    start_time = data.get('start_time')
-    end_time = data.get('end_time')
-    if alarm_state == "on":
-        mqtt_client.ALARM_ON = True
-        mqtt_client.START_TIME = start_time
-        mqtt_client.END_TIME = end_time
-    else:
-        mqtt_client.ALARM_ON = False
+    mqtt_client.ALARM_ON = data.get('alarm_state')
+    mqtt_client.START_TIME = data.get('start_time')
+    mqtt_client.END_TIME = data.get('end_time')
     print(f"[flask] Alarm state updated: ALARM_ON={mqtt_client.ALARM_ON}")
     return jsonify({"message": "Alarm state updated."})
+
+@app.route('/alarm_state', methods=['GET'])
+def get_alarm_state():
+    return jsonify({
+        'startTime': mqtt_client.START_TIME,
+        'endTime': mqtt_client.END_TIME,
+        'alarm_state': mqtt_client.ALARM_ON
+    })
 
 
 if __name__ == "__main__":
